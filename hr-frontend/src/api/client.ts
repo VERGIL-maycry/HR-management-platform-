@@ -1,6 +1,11 @@
 const ACCESS_TOKEN_KEY = 'accessToken'
 const REFRESH_TOKEN_KEY = 'refreshToken'
 
+function apiUrl(path: string): string {
+  const base = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '')
+  return `${base}${path}`
+}
+
 export type Role = 'ADMIN' | 'HR' | 'MANAGER' | 'EMPLOYEE'
 
 export type AuthResponse = {
@@ -156,7 +161,7 @@ async function refreshAccessToken(): Promise<boolean> {
     const refreshToken = getRefreshToken()
     if (!refreshToken) return false
 
-    const response = await fetch('/api/auth/refresh', {
+    const response = await fetch(apiUrl('/api/auth/refresh'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ refreshToken }),
@@ -193,7 +198,7 @@ export async function apiFetch(path: string, options: RequestInit = {}, retry = 
 
   let response: Response
   try {
-    response = await fetch(path, { ...options, headers })
+    response = await fetch(apiUrl(path), { ...options, headers })
   } catch {
     throw new ApiError('Impossible de joindre l’API. Démarrez le backend sur le port 8080.', 0)
   }
@@ -223,7 +228,7 @@ export async function apiJson<T>(path: string, options: RequestInit = {}): Promi
 export async function login(email: string, password: string): Promise<AuthResponse> {
   let response: Response
   try {
-    response = await fetch('/api/auth/login', {
+    response = await fetch(apiUrl('/api/auth/login'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
